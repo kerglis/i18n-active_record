@@ -54,10 +54,9 @@ module I18n
         serialize :value
         serialize :interpolations, Array
 
+        named_scope :locale, lambda { |locale| { :conditions => [ "locale = ?", locale.to_s] }}
+
         class << self
-          def locale(locale)
-            find(:all, :conditions => [ "locale = ?", locale.to_s] )
-          end
 
           def lookup(keys, *separator)
             column_name = connection.quote_column_name('key')
@@ -73,7 +72,7 @@ module I18n
           end
 
           def available_locales
-            Translation.distinct.pluck(:locale).map(&:to_sym)
+            Translation.find(:all, :select => 'distinct locale').map{|r| r.locale.to_sym }
           end
         end
 
